@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Юкасса Виджет</title>
+    <script src="https://yookassa.ru/payouts-data/3.1.0/widget.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script> <!-- Telegram SDK -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        h2 {
+            text-align: center;
+            color: #444;
+        }
+        #payout-form {
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        .yk-form-button {
+            background-color: #007bff !important; /* Более яркая кнопка */
+            color: #fff !important;
+            border-radius: 6px !important;
+            padding: 10px 20px !important;
+            font-size: 16px !important;
+            cursor: pointer;
+        }
+        .yk-form-button:hover {
+            background-color: #0056b3 !important;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Введите данные вашей карты</h2>
+<div id="payout-form"></div>
+
+<script>
+    // Инициализация Telegram.WebApp
+    const tg = window.Telegram.WebApp;
+    tg.expand(); // Расширяет окно
+
+    // Инициализация виджета Юкасса
+    const payoutsData = new window.PayoutsData({
+        type: 'payout',
+        account_id: '507663', // Замените на ваш идентификатор шлюза
+        success_callback: function(data) {
+            const payoutToken = data.payout_token;
+
+            // Отправка токена обратно боту через Telegram WebApp
+            tg.sendData(JSON.stringify({ payout_token: payoutToken }));
+
+            // Уведомляем пользователя
+            alert("Данные отправлены в бота!");
+        },
+        error_callback: function(error) {
+            alert("Ошибка при вводе данных: " + error);
+        },
+        lang: 'ru'
+    });
+
+    // Отображение формы виджета
+    payoutsData.render('payout-form')
+        .then(() => console.log("Форма успешно загружена"))
+        .catch(err => console.error("Ошибка загрузки формы: ", err));
+</script>
+
+</body>
+</html>
