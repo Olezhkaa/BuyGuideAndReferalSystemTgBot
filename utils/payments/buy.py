@@ -9,7 +9,8 @@ from aiogram.enums import ParseMode, ContentType
 from aiogram.types import PreCheckoutQuery, FSInputFile
 
 from config import CURRENCY, WALLET_TOKEN_BUY, BOT_TOKEN, DATABASE, AMOUNT
-from db_handler.database import get_promo_by_code
+from db_handler.database import get_promo_by_code, update_user_balance_plus, insert_transaction, \
+    update_user_guide_purchased_and_ref_by
 from keyboards.keyboards import payment_keyboard
 
 router = Router()
@@ -17,14 +18,14 @@ router = Router()
 bot = Bot(token=BOT_TOKEN,
           default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
-async def bot_send_invoice_buy_course(chat_id, amount, promo_code):
+async def bot_send_invoice_buy_guide(chat_id, amount, promo_code):
     prices = [types.LabeledPrice(label=CURRENCY, amount=amount*100)]
 
     provider_data = {
         "receipt": {
             "items": [
                 {
-                    "description": "Курс",
+                    "description": "Гайд",
                     "quantity": "1.00",
                     "amount": {
                         "value": f"{amount:.2f}",
@@ -39,8 +40,8 @@ async def bot_send_invoice_buy_course(chat_id, amount, promo_code):
 
     await bot.send_invoice(
         chat_id=chat_id,
-        title="Курс",
-        description="Покупай курс и начинай зарабатывать деньги!",
+        title="Гайд",
+        description="Покупай гайд и начинай зарабатывать деньги!",
         payload=promo_code,
         provider_token=WALLET_TOKEN_BUY,
         currency=CURRENCY,
@@ -94,24 +95,21 @@ async def handle_successful_payment(message: types.Message):
     await message.answer(f"{product_text}")
 
 def save_db(user_id, payment_id, amount, discount, ref_by):
-    connection = sqlite3.connect(DATABASE)
-    cursor = connection.cursor()
-
     # Обновление информации о покупке
-    cursor.execute("UPDATE users SET course_purchased = TRUE, ref_by = ? WHERE id_user_tg = ?", (ref_by, user_id))
-    cursor.execute("INSERT INTO transactions (user_id, payment_id, amount, type) VALUES (?, ?, ?, ?)",
-                   (user_id, payment_id, amount, 'purchase'))
+    update_user_guide_purchased_and_ref_by(user_id, ref_by)
+    insert_transaction(user_id, payment_id, amount, 'purchase')
 
     # Начисление реферального бонуса
     if ref_by:
         referral_bonus = amount/(100 - discount) * 100 * 0.25
-        cursor.execute("UPDATE users SET balance = balance + ? WHERE id_user_tg = ?", (referral_bonus, ref_by))
-        cursor.execute("INSERT INTO transactions (user_id, payment_id, amount, type) VALUES (?, ?, ?, ?)",
-                       (ref_by, payment_id, referral_bonus, 'referral_reward'))
+        update_user_balance_plus(ref_by, referral_bonus)
+        insert_transaction(ref_by, payment_id, referral_bonus, 'referral_reward')
 
-    connection.commit()
-    cursor.close()
-    connection.commit()
+        update_user_balance_plus('0001', referral_bonus)
+        insert_transaction('0001', payment_id, referral_bonus, 'admin_bank_percent')
+    else:
+        update_user_balance_plus('0001', amount)
+        insert_transaction('0001', payment_id, amount, 'admin_bank')
 
 
 

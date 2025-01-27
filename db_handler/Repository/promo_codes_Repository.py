@@ -51,3 +51,30 @@ def update_promo_code(user_id, promo):
     connection.commit()
     cursor.close()
     connection.close()
+
+def top_promo(limit):
+    connection = sqlite3.connect(DATABASE)
+    cursor = connection.cursor()
+
+    cursor.execute("""
+    SELECT 
+        pc.code AS promo_code,
+        COUNT(u.id_user_tg) AS users_count
+    FROM 
+        promo_codes pc
+    LEFT JOIN 
+        users u ON pc.owner_id = u.ref_by
+    GROUP BY 
+        pc.code
+    ORDER BY 
+        users_count DESC
+    LIMIT ?;
+    """, (limit, ))
+
+    list_promo = cursor.fetchall()
+
+    connection.commit()
+    cursor.close()
+    connection.close()
+
+    return list_promo

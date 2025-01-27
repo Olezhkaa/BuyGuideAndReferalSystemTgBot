@@ -7,19 +7,19 @@ from aiogram.fsm.state import StatesGroup, State
 
 from config import AMOUNT
 from db_handler.database import get_promo_by_code
-from utils.payments.buy import bot_send_invoice_buy_course
+from utils.payments.buy import bot_send_invoice_buy_guide
 
 router = Router()
 
-class FormByCourse(StatesGroup):
+class FormByGuide(StatesGroup):
     waiting_for_promo_code = State()
 
 @router.callback_query(lambda call: call.data == "check_promo")
 async def check_promo_callback(call, state: FSMContext):
     await call.message.answer("Введите промокод:")
-    await state.set_state(FormByCourse.waiting_for_promo_code)
+    await state.set_state(FormByGuide.waiting_for_promo_code)
 
-@router.message(StateFilter(FormByCourse.waiting_for_promo_code))
+@router.message(StateFilter(FormByGuide.waiting_for_promo_code))
 async def waiting_for_promo(message: types.Message, state: FSMContext):
     promo_code = str(message.text).strip()
 
@@ -32,4 +32,4 @@ async def waiting_for_promo(message: types.Message, state: FSMContext):
         return
 
     await state.clear()
-    await bot_send_invoice_buy_course(message.from_user.id, AMOUNT/2, promo_code=promo_code)
+    await bot_send_invoice_buy_guide(message.from_user.id, AMOUNT/2, promo_code=promo_code)

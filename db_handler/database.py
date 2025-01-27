@@ -2,6 +2,8 @@ import sqlite3
 from config import DATABASE
 from db_handler.Repository import users_Repository
 from db_handler.Repository import promo_codes_Repository
+from db_handler.Repository.users_Repository import insert_admin
+from db_handler.Repository import  transactions_Repository
 
 
 def init_db():
@@ -9,6 +11,7 @@ def init_db():
     cursor = connection.cursor()
 
     create_table(cursor)
+    insert_admin()
 
     connection.commit()
     cursor.close()
@@ -26,14 +29,17 @@ def get_user_by_id(user_id): return users_Repository.get_user_by_id(user_id)
 def update_user_balance_minus(id_user_tg, amount_withdrawal): users_Repository.update_user_balance_minus(id_user_tg, amount_withdrawal)
 def update_user_balance_plus(id_user_tg, amount_withdrawal): users_Repository.update_user_balance_plus(id_user_tg, amount_withdrawal)
 def update_user_promo(id_user_tg, promo): users_Repository.update_user_promo(id_user_tg, promo)
-
-
-def create_table_transactions(cursor):
-    cursor.execute(
-        'CREATE TABLE IF NOT EXISTS transactions (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT, payment_id TEXT, amount REAL, type TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)')
+def get_users_ref_by(promo): return users_Repository.get_users_ref_by(promo)
+def get_all_by_guide(): return  users_Repository.get_all_by_guide()
+def update_user_guide_purchased_and_ref_by(user_id, ref_by): users_Repository.update_user_guide_purchased_and_ref_by(user_id, ref_by)
 
 def create_table_promo_codes(cursor): promo_codes_Repository.create_table_promo_codes(cursor)
 def insert_promo_code(code, discount, owner_id): promo_codes_Repository.insert_promo_code(code, discount, owner_id)
 def get_promo_by_code(code): return promo_codes_Repository.get_promo_by_code(code)
 def get_code_by_user_id(user_id): return promo_codes_Repository.get_code_by_user_id(user_id)
 def update_promo_code(user_id, promo): return promo_codes_Repository.update_promo_code(user_id, promo)
+def top_promo(limit): return promo_codes_Repository.top_promo(limit)
+
+def create_table_transactions(cursor): transactions_Repository.create_table_transactions(cursor)
+def insert_transaction(user_id, payment_id, amount, type_payment): transactions_Repository.insert_transaction(user_id, payment_id, amount, type_payment)
+
