@@ -20,13 +20,19 @@ class WithdrawalState(StatesGroup):
 @router.callback_query(lambda call: call.data == "out_money")
 async def out_money_test(call):
     user = get_user_by_id(call.from_user.id)
-    if int(user[2]) < 2500 and not check_admin(call.from_user.id):
-        await call.message.answer("❌ У вас недостаточно средств ❌\n\n"
-                                  "<i>Для вывода необходимо минимум 2500 RUB</i>", reply_markup=types.ReplyKeyboardRemove())
+    if user[5] or check_admin(call.from_user.id):
+        if int(user[2]) < 2500 and not check_admin(call.from_user.id):
+            await call.message.answer("❌ У вас недостаточно средств ❌\n\n"
+                                      "<i>Для вывода необходимо минимум 2500 RUB</i>",
+                                      reply_markup=types.ReplyKeyboardRemove())
+        else:
+            await call.message.answer(f"💸 <b>Вывод средств</b> 💸\n\n"
+                                      f"<i>Нажмите кнопку ниже, чтобы вывести деньги на карту банка</i>",
+                                      reply_markup=out_money_get_card())
     else:
-        await call.message.answer(f"💸 <b>Вывод средств</b> 💸\n\n"
-                                  f"<i>Нажмите кнопку ниже, чтобы вывести деньги на карту банка</i>",
-                                  reply_markup=out_money_get_card())
+        await call.message.answer("❌ Гайд еще не куплен. ❌\nВведите команду: /start")
+        return
+
 
 # Обработка данных из WebApp
 @router.message(F.content_type == ContentType.WEB_APP_DATA)

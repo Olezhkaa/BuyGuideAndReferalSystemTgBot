@@ -1,4 +1,5 @@
-import sqlite3
+import psycopg2
+from config import  HOST, USER, PASSWORD, DATABASE
 from config import DATABASE
 from db_handler.Repository import users_Repository
 from db_handler.Repository import promo_codes_Repository
@@ -7,7 +8,7 @@ from db_handler.Repository import  transactions_Repository
 
 
 def init_db():
-    connection = sqlite3.connect(DATABASE)
+    connection = psycopg2.connect(dbname=DATABASE, host=HOST, user=USER, password=PASSWORD )
     cursor = connection.cursor()
 
     create_table(cursor)

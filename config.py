@@ -18,4 +18,7 @@ ADMINS = json.loads(os.environ['admins'])
 AMOUNT = 840
 CURRENCY = "RUB"
 
-DATABASE = config['db']
+HOST = config['host']
+USER = config['user']
+PASSWORD = config['password']
+DATABASE = config['database']

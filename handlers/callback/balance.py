@@ -17,7 +17,11 @@ async def check_balance(call):
                 f"Ваш личный баланс: {balance} RUB\n"
                 f"Админ баланс: {balance_admin} RUB")
     else:
-        text = (f"<b>Баланс</b>\n\n"
-                f"Ваш текущий баланс: {balance} RUB")
+        if get_user_by_id(user_id)[5]:
+            text = (f"<b>Баланс</b>\n\n"
+                    f"Ваш текущий баланс: {balance} RUB")
+        else:
+            await call.message.answer("❌ Гайд еще не куплен. ❌\nВведите команду: /start")
+            return
 
     await call.message.answer(text=text, reply_markup=balance_out_money())

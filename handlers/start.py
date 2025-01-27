@@ -17,13 +17,13 @@ async def start(message: types.Message):
 
     if not database.user_exist(user_id):
         database.insert_user(user_id, user_full_name)
-        #database.insert_promo_code(promo, 50, user_id)
     else:
         have_bought_guide = get_user_by_id(message.from_user.id)[5]
 
-    await message.answer("Добро пожаловать! \nВыберите одну из функций:",  reply_markup=main_menu_button(have_bought_guide, check_admin(user_id)))
+    await message.answer("<b>Добро пожаловать!</b>\n\n"
+                         "<i>Для продолжения работы, выберите одну из функций, указанных ниже:</i>",  reply_markup=main_menu_button(have_bought_guide, check_admin(user_id)))
 
 
-import string, random
-def generate_promo_code():
-    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+# import string, random
+# def generate_promo_code():
+#    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))

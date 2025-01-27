@@ -16,7 +16,7 @@ from keyboards.keyboards import check_promo_code
 route = Router()
 
 @route.callback_query(lambda call: call.data == "by_guide")
-async def purchase_guide(call, state: FSMContext):
+async def purchase_guide(call):
     user_id = call.from_user.id
     guide_purchased = get_user_by_id(user_id)[5]
     #guide_purchased = False

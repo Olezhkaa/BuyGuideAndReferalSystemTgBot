@@ -16,11 +16,21 @@ class FormByGuide(StatesGroup):
 
 @router.callback_query(lambda call: call.data == "check_promo")
 async def check_promo_callback(call, state: FSMContext):
-    await call.message.answer("Введите промокод:")
+    buttons = [[types.KeyboardButton(text='❌ Отмена ❌')], ]
+    markup = types.ReplyKeyboardMarkup(keyboard=buttons, resize_keyboard=True, one_time_keyboard=True)
+
+    await call.message.answer("Введите промокод:", reply_markup=markup)
     await state.set_state(FormByGuide.waiting_for_promo_code)
 
 @router.message(StateFilter(FormByGuide.waiting_for_promo_code))
 async def waiting_for_promo(message: types.Message, state: FSMContext):
+
+    if message.text == "Отмена" or message.text == "❌ Отмена ❌":
+        await message.answer("<b>Отмена действия</b>\n\n"
+                             "<i>Введите команду /start</i>", reply_markup=types.ReplyKeyboardRemove())
+        await state.clear()
+        return
+
     promo_code = str(message.text).strip()
 
     promo = get_promo_by_code(promo_code)

@@ -1,5 +1,4 @@
 import logging
-import sqlite3
 
 from aiogram import types, Router, Bot, F
 import json

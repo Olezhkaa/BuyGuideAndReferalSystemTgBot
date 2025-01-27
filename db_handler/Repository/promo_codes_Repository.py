@@ -1,4 +1,5 @@
-import sqlite3
+import psycopg2
+from config import HOST, USER, PASSWORD
 
 from config import DATABASE
 
@@ -7,11 +8,11 @@ def create_table_promo_codes(cursor):
         'CREATE TABLE IF NOT EXISTS promo_codes (code TEXT PRIMARY KEY, discount REAL DEFAULT 50, owner_id TEXT)')
 
 def insert_promo_code(code, discount, owner_id):
-    connection = sqlite3.connect(DATABASE)
+    connection = psycopg2.connect(dbname=DATABASE, host=HOST, user=USER, password=PASSWORD )
     cursor = connection.cursor()
 
     cursor.execute(
-        'INSERT INTO promo_codes (code, discount, owner_id) VALUES (?, ?, ?)', (code, discount, owner_id)
+        'INSERT INTO promo_codes (code, discount, owner_id) VALUES (%s, %s, %s)', (str(code), discount, str(owner_id))
     )
 
     connection.commit()
@@ -19,10 +20,11 @@ def insert_promo_code(code, discount, owner_id):
     connection.close()
 
 def get_promo_by_code(code):
-    connection = sqlite3.connect(DATABASE)
+    connection = psycopg2.connect(dbname=DATABASE, host=HOST, user=USER, password=PASSWORD )
     cursor = connection.cursor()
 
-    promo_code = cursor.execute("SELECT * FROM promo_codes WHERE code = ?", (code,)).fetchone()
+    cursor.execute("SELECT * FROM promo_codes WHERE code = %s", (str(code),))
+    promo_code = cursor.fetchone()
 
     connection.commit()
     cursor.close()
@@ -31,10 +33,11 @@ def get_promo_by_code(code):
     return promo_code
 
 def get_code_by_user_id(owner_id):
-    connection = sqlite3.connect(DATABASE)
+    connection = psycopg2.connect(dbname=DATABASE, host=HOST, user=USER, password=PASSWORD )
     cursor = connection.cursor()
 
-    promo_code = cursor.execute("SELECT * FROM promo_codes WHERE owner_id = ?", (owner_id,)).fetchone()
+    cursor.execute("SELECT * FROM promo_codes WHERE owner_id = %s", (str(owner_id),))
+    promo_code =cursor.fetchone()
 
     connection.commit()
     cursor.close()
@@ -43,17 +46,17 @@ def get_code_by_user_id(owner_id):
     return promo_code
 
 def update_promo_code(user_id, promo):
-    connection = sqlite3.connect(DATABASE)
+    connection = psycopg2.connect(dbname=DATABASE, host=HOST, user=USER, password=PASSWORD )
     cursor = connection.cursor()
 
-    cursor.execute("UPDATE promo_codes SET code = (?) WHERE owner_id = (?)", (promo, user_id))
+    cursor.execute("UPDATE promo_codes SET code = (%s) WHERE owner_id = (%s)", (str(promo), str(user_id)))
 
     connection.commit()
     cursor.close()
     connection.close()
 
 def top_promo(limit):
-    connection = sqlite3.connect(DATABASE)
+    connection = psycopg2.connect(dbname=DATABASE, host=HOST, user=USER, password=PASSWORD )
     cursor = connection.cursor()
 
     cursor.execute("""
@@ -68,7 +71,7 @@ def top_promo(limit):
         pc.code
     ORDER BY 
         users_count DESC
-    LIMIT ?;
+    LIMIT %s;
     """, (limit, ))
 
     list_promo = cursor.fetchall()

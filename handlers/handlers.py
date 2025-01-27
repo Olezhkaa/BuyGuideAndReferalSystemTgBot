@@ -11,10 +11,15 @@ import handlers.callback.withdrawal_balance
 import handlers.callback.create_promo
 import handlers.type_and_other_message
 import handlers.callback.admin_panel
+import handlers.help
+import handlers.support
 
 
 async def include_routers_handlers(dp):
     dp.include_routers(handlers.start.router)
+    dp.include_routers(handlers.help.router)
+    dp.include_routers(handlers.support.router)
+
     dp.include_routers(handlers.callback.by_guide.route)
     dp.include_routers(handlers.callback.balance.router)
     dp.include_routers(handlers.callback.no_promo.router)
